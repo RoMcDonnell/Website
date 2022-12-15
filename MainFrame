@@ -1,0 +1,109 @@
+//Below I am creating the pop out window of the application
+//Import the package for JFrame and WindowConstants
+import javax.swing.JFrame;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.awt.event.ActionEvent;
+import javax.swing.*;
+
+import java.awt.*;
+import java.awt.event.*;
+
+public class MainFrame {
+	
+	private JFrame frame;
+	private JTextField input;
+	private JTextArea textArea;
+	private int width;
+	private int height;
+	private JButton button1;
+	private JButton button2;
+	private Cursor waitCursor;
+	  private Cursor defaultCursor;
+	
+	public MainFrame (int w, int h) {
+		frame = new JFrame("Rosies Honeypot Analyser");
+		textArea = new JTextArea("Hello");
+		input = new JTextField(10);
+		width = w;
+		height = h;
+		button1 = new JButton("Button 1");
+		button2 = new JButton("Button 2");
+		waitCursor = new Cursor(Cursor.WAIT_CURSOR);
+		defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
+	}
+	//creating main method - adding components and setting the layout
+	public void setUpGUI() {
+		Container cp = frame.getContentPane();
+		FlowLayout flow = new FlowLayout();
+		cp.setLayout(flow);
+		frame.setSize(width, height);
+		//frame.setTitle("Welcome!");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		cp.add(input);
+		cp.add(textArea);
+		cp.add(button1);
+		cp.add(button2);
+		frame.setVisible(true);
+	}
+	
+
+	
+	//adding the event listener in a separate class as it doesn't need too many fields or methods
+	
+	public void setUpButtonListeners() {
+		ActionListener buttonListener = new ActionListener() {
+			//`@Override
+			public void actionPerformed(ActionEvent ae) {
+				Object o = ae.getSource();
+				
+				if(o == button1) {
+					//allowing the user to input text into the Frame
+					String s = input.getText();
+					textArea.setText(s);
+					//empty the text box that the user types into
+					input.setText("");
+					
+				} else if(o == button2) {
+					// Set the cursor to the busy cursor
+				    frame.setCursor(waitCursor);
+				    
+				    String sOutput="";
+				    textArea.setText("This may take some time, please be patient");
+					// have to get the text area to update itself?? How
+					try {
+						String arg1="test";
+							Process proc = Runtime.getRuntime().exec("/home/ruby/hpot/loop.sh"+" "+arg1);
+							BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+							
+							try {
+								proc.waitFor();
+							}
+							catch(InterruptedException e) {
+								System.out.println(e.getMessage());
+							}
+							while (read.ready()) {
+								sOutput+=read.readLine() + "\n";
+								textArea.setText(sOutput);
+							}
+					} catch(IOException e) {
+							System.out.println(e.getMessage());
+					}
+					textArea.setText(sOutput);
+					System.out.println(sOutput);
+					
+					// Set the cursor back to the default cursor
+					frame.setCursor(defaultCursor);
+				}
+			}
+		};
+		
+		button1.addActionListener(buttonListener);
+		button2.addActionListener(buttonListener);
+	}
+  
+}
+	
